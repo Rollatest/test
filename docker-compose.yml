@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  app:
+    container_name: app_container
+    restart: always
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+      - redis
+      - prisma
+
+  prisma:
+    container_name: prisma_container
+    restart: always
+    build: ./prisma
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresql
+      - redis
+
+  postgresql:
+    container_name: postgresql_container
+    image: postgres:latest
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:5432/${POSTGRES_NAME}
+    volumes:
+      - appDB:/var/lib/postgresql/data
+
+  redis:
+    container_name: redis_container
+    image: redis
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    env-file:
+     - .env 
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - appRedis:/data/redis-server
+
+volumes:
+  appDB:
+  appRedis:

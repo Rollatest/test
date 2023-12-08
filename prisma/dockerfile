@@ -1,0 +1,13 @@
+# Use an official Node.js runtime as a parent image
+FROM node:latest
+
+
+WORKDIR /app/prisma
+
+COPY schema.prisma ./
+COPY seed.js ./
+
+RUN npm install -g prisma
+
+
+CMD ["node", "seed.js"]
